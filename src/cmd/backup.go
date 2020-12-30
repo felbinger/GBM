@@ -36,14 +36,14 @@ func backup(conf utils.Config) {
 	// backup files
 	for _, file := range conf.Jobs.Files {
 		dest := utils.RemoveTrailingSlash(fmt.Sprintf("%s/%s/%s", conf.Location, date, file.Name))
-		fileBackup(file.Paths, file.Ignore, dest, file.Compress)
+		fileBackup(file.Paths, file.Ignore, file.IgnoreExtension, dest, file.Compress)
 	}
 
 	// generate checksums
 	utils.GenerateChecksums(fmt.Sprintf("%s/%s", conf.Location, date), conf.Checksums)
 }
 
-func fileBackup(sources []string, ignore []string, dest string, compress bool) {
+func fileBackup(sources []string, ignore []string, ignoreExt []string, dest string, compress bool) {
 	if compress {
 		dest = dest + ".tar.gz"
 	}
@@ -56,7 +56,7 @@ func fileBackup(sources []string, ignore []string, dest string, compress bool) {
 	if compress {
 		// create tar file on dest with contents of sources
 		log.Info(fmt.Sprintf("[%s] -> %s\n", strings.Join(sources, ","), dest))
-		err := utils.CreateTarball(dest, sources, ignore)
+		err := utils.CreateTarball(dest, sources, ignore, ignoreExt)
 		if err != nil {
 			log.Fatal(err)
 		}

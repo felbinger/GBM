@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func CreateTarball(path string, content []string, ignore []string) error {
+func CreateTarball(path string, content []string, ignore []string, ignoreExt []string) error {
 	usingCreatedFile := false
 
 	file, err := os.Create(path)
@@ -38,6 +38,11 @@ func CreateTarball(path string, content []string, ignore []string) error {
 			// do not add paths to tar file that should be ignored
 			for _, ignorePath := range ignore {
 				if file == ignorePath || strings.HasPrefix(file, ignorePath+"/") {
+					return nil
+				}
+			}
+			for _, ext := range ignoreExt {
+				if strings.HasSuffix(file, ext) {
 					return nil
 				}
 			}

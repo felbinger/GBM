@@ -11,10 +11,11 @@ import (
 )
 
 type File struct {
-	Name     string
-	Compress bool
-	Paths    []string
-	Ignore   []string
+	Name     		string
+	Compress 		bool
+	Paths    		[]string
+	Ignore   		[]string
+	IgnoreExtension []string `yaml:"ignore_extension"`
 }
 
 type Job struct {

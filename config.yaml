@@ -11,6 +11,8 @@ jobs:
         - "/srv/main"
       ignore:
         - "/srv/main/ignore_this"
+      ignore_extension:
+        - "mp4"
 
     - name: admin
       compress: true
