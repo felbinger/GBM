@@ -5,6 +5,10 @@ on:
     branches: [ master ]
     tags: [ 'v*' ]
   pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * *' # everyday at 00:00 UTC
 
 jobs:
 
@@ -12,7 +16,7 @@ jobs:
     name: Linting (GoLang 1.15)
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go ${{ matrix.go_version }}
+      - name: Set up Go 1.15
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
@@ -27,17 +31,17 @@ jobs:
           # Cache
           path: ~/go/pkg/mod
           # Cache key
-          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          key: ubuntu-latest-go-${{ hashFiles('**/_go.sum') }}
           # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
           restore-keys: ubuntu-latest-go-
 
       - name: Install go ci lint
         run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
-        working-directory: src
+        working-directory: src/gbm
 
       - name: Run Linter
         run: golangci-lint run --timeout=10m -v --disable-all --enable=govet --enable=staticcheck --enable=ineffassign --enable=misspell
-        working-directory: src
+        working-directory: src/gbm
 
   test:
     name: Testing (GoLang ${{ matrix.go_version }})
@@ -65,17 +69,17 @@ jobs:
           # Cache
           path: ~/go/pkg/mod
           # Cache key
-          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          key: ubuntu-latest-go-${{ hashFiles('**/_go.sum') }}
           # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
           restore-keys: ubuntu-latest-go-
 
       - name: Install goimports
         run: go get golang.org/x/tools/cmd/goimports
-        working-directory: src
+        working-directory: src/gbm
 
       - name: Test
         run: go test -v -race ./...
-        working-directory: src
+        working-directory: src/gbm
 
   build:
     needs: [ lint, test ]
@@ -97,17 +101,17 @@ jobs:
           # Cache
           path: ~/go/pkg/mod
           # Cache key
-          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          key: ubuntu-latest-go-${{ hashFiles('**/_go.sum') }}
           # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
           restore-keys: ubuntu-latest-go-
 
       - name: Install goimports
         run: go get golang.org/x/tools/cmd/goimports
-        working-directory: src
+        working-directory: src/gbm
 
       - name: Build
         run: go build -o ../bin/gbm -v
-        working-directory: src
+        working-directory: src/gbm
 
       - uses: actions/upload-artifact@v2
         with:
@@ -119,11 +123,6 @@ jobs:
     name: "CodeQL: Analyze"
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'go' ]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -131,10 +130,10 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
-          languages: ${{ matrix.language }}
+          languages: go
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v1
+      #- name: Autobuild
+      #  uses: github/codeql-action/autobuild@v1
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1

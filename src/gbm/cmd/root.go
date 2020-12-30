@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/felbinger/GBM/utils"
+	"gbm/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

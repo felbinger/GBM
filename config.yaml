@@ -25,6 +25,33 @@ jobs:
       paths:
         - "/etc/ssh/sshd_config"
 
+  ldap:
+    - container_name: main_ldap_1
+      base_dn: dc=domain,dc=de
+      bind_dn: cn=admin,dc=domain,dc=de
+      bind_pw: S3cr3T
+
+  mariadb:
+    - container_name: main_mariadb_1
+      username: backup
+      password: S3cr3T
+      databases:
+        - mariadb_backup
+
+  postgres:
+    - container_name: main_postgres_1
+      username: postgres
+      password: S3cr3T
+      databases:
+        - postgres_backup
+
+  mongodb:
+    - container_name: main_mongodb_1
+      username: backup
+      password: S3cr3T
+      databases:
+        - mongo_backup
+
 strategy:
   # how many days should backups be stored, til they get deleted?
   expiry_days: 14

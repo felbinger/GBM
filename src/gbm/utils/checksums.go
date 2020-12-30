@@ -32,17 +32,17 @@ func GenerateChecksums(path string, sums []string) {
 
 			// this switch could be improved, might work using reflections
 			switch checksum {
-				case "md5":
-					h = md5.New()
-				case "sha1":
-					h = sha1.New()
-				case "sha256":
-					h = sha256.New()
-				case "sha512":
-					h = sha512.New()
-				default:
-					log.Debug(fmt.Sprintf("Checksum %s does not exist!", checksum))
-					return nil
+			case "md5":
+				h = md5.New()
+			case "sha1":
+				h = sha1.New()
+			case "sha256":
+				h = sha256.New()
+			case "sha512":
+				h = sha512.New()
+			default:
+				log.Debug(fmt.Sprintf("Checksum %s does not exist!", checksum))
+				return nil
 			}
 			_, genErr := io.Copy(h, f)
 			if genErr != nil {

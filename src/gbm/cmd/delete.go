@@ -3,7 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/felbinger/GBM/utils"
+	"gbm/utils"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
