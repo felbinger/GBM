@@ -29,7 +29,7 @@ func backup(conf utils.Config) {
 	date := time.Now().Format("2006-01-02")
 	err := os.MkdirAll(fmt.Sprintf("%s/%s", conf.Location, date), 0755)
 	if err != nil {
-		log.Fatal("Unable to create backup directory: %s", conf.Location)
+		log.Fatal(fmt.Sprintf("Unable to create backup directory: %s", conf.Location))
 		return
 	}
 
@@ -67,9 +67,9 @@ func fileBackup(sources []string, ignore []string, dest string, compress bool) {
 		// copy src to dest https://opensource.com/article/18/6/copying-files-go
 		size, err := cp(src, dest)
 		if err != nil {
-			log.Debug("%s -> %s (error: %v)\n", src, dest, err)
+			log.Debug(fmt.Sprintf("%s -> %s (error: %v)\n", src, dest, err))
 		} else {
-			log.Debug("%s -> %s (size: %d)\n", src, dest, size)
+			log.Debug(fmt.Sprintf("%s -> %s (size: %d)\n", src, dest, size))
 		}
 	}
 }

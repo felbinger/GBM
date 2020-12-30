@@ -3,7 +3,6 @@ package utils
 import (
 	"archive/tar"
 	"compress/gzip"
-	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -17,7 +16,8 @@ func CreateTarball(path string, content []string, ignore []string) error {
 
 	file, err := os.Create(path)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to create archive file '%s': '%s'", path, err.Error()))
+		log.Debug(fmt.Sprintf("Unable to create archive file %s.", path))
+		return err
 	}
 	defer file.Close()
 
@@ -92,7 +92,7 @@ func CreateTarball(path string, content []string, ignore []string) error {
 
 	// remove tar file if there is nothing in it..
 	if !usingCreatedFile {
-		log.Debug("The Archive %s has been deleted, cause there where nothing to put into it.", path)
+		log.Debug(fmt.Sprintf("The Archive %s has been deleted, cause there where nothing to put into it.", path))
 		err := os.RemoveAll(path)
 		if err != nil {
 			log.Error(err)

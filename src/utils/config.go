@@ -39,17 +39,17 @@ func Configure(fileName string) *Config {
 
 	// check if fileName exists
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
-		log.Fatal("%s does not exist!\n", fileName)
+		log.Fatal(fmt.Sprintf("%s does not exist!\n", fileName))
 		os.Exit(1)
 	}
 
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		log.Fatal("Configuration Error:   #%v ", err)
+		log.Fatal(fmt.Sprintf("Configuration Error:   #%v ", err))
 	}
 	err = yaml.Unmarshal(file, &c)
 	if err != nil {
-		log.Fatal("Configuration Error: %v", err)
+		log.Fatal(fmt.Sprintf("Configuration Error: %v", err))
 	}
 
 	// remove trailing slash in location path
@@ -61,13 +61,6 @@ func Configure(fileName string) *Config {
 func RemoveTrailingSlash(path string) string {
 	if path[len(path)-1:] == "/" {
 		path = path[:len(path)-1]
-	}
-	return path
-}
-
-func AppendTrailingSlash(path string) string {
-	if path[len(path)-1:] != "/" {
-		path += "/"
 	}
 	return path
 }
@@ -95,7 +88,7 @@ func ShowConfiguration(conf Config, secure bool) {
 			fmt.Printf("- %s -> %s\n", src, dest)
 		}
 		for _, src := range file.Ignore {
-			fmt.Printf("- %s will be ignored.\n", src)
+			log.Debug(fmt.Sprintf("- %s will be ignored.\n", src))
 		}
 	}
 }

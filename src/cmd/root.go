@@ -41,19 +41,14 @@ func initConfig() {
 	switch logLevel {
 	case "INFO":
 		log.SetLevel(log.InfoLevel)
-		break
 	case "DEBUG":
 		log.SetLevel(log.DebugLevel)
-		break
 	case "WARNING":
 		log.SetLevel(log.WarnLevel)
-		break
 	case "ERROR":
 		log.SetLevel(log.ErrorLevel)
-		break
 	case "CRITICAL":
 		log.SetLevel(log.FatalLevel)
-		break
 	}
 	Configuration = *utils.Configure(configFile)
 }

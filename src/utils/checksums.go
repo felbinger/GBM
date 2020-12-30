@@ -32,25 +32,21 @@ func GenerateChecksums(path string, sums []string) {
 
 			// this switch could be improved, might work using reflections
 			switch checksum {
-			case "md5":
-				h = md5.New()
-				break
-			case "sha1":
-				h = sha1.New()
-				break
-			case "sha256":
-				h = sha256.New()
-				break
-			case "sha512":
-				h = sha512.New()
-				break
-			default:
-				log.Debug(fmt.Sprintf("Checksum %s does not exist!", checksum))
-				return nil
+				case "md5":
+					h = md5.New()
+				case "sha1":
+					h = sha1.New()
+				case "sha256":
+					h = sha256.New()
+				case "sha512":
+					h = sha512.New()
+				default:
+					log.Debug(fmt.Sprintf("Checksum %s does not exist!", checksum))
+					return nil
 			}
-			_, err = io.Copy(h, f)
-			if err != nil {
-				log.Debug("Unable to generate checksum!", err)
+			_, genErr := io.Copy(h, f)
+			if genErr != nil {
+				log.Debug("Unable to generate checksum!", genErr)
 				return nil
 			}
 			checksums = append(checksums, entry{h.Sum(nil), filepath.Base(file)})

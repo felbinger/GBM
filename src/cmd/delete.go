@@ -15,16 +15,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
+// deleteCmd represents the deleteBackup command
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "deleteBackup",
 	Short: "Manage Mode",
 	Run: func(cmd *cobra.Command, args []string) {
 		noInput, err := strconv.ParseBool(cmd.Flag("no-input").Value.String())
 		if err != nil {
 			log.Fatal("Unable to parse no-input parameter. Exiting...")
 		}
-		delete(Configuration, noInput)
+		deleteBackup(Configuration, noInput)
 	},
 }
 
@@ -33,15 +33,15 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 }
 
-func delete(conf utils.Config, noInput bool) {
+func deleteBackup(conf utils.Config, noInput bool) {
 	// get a list of existing backups
 	files, err := ioutil.ReadDir(conf.Location)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// generate a list of backups to delete (older then n days and not in the list to be ignored)
-	var deleteableBackups []string
+	// generate a list of backups to deleteBackup (older then n days and not in the list to be ignored)
+	var deletableBackups []string
 	date := time.Now().AddDate(0, 0, -(conf.Strategy.ExpiryDays))
 	for _, file := range files {
 		fileName := file.Name()
@@ -55,12 +55,12 @@ func delete(conf utils.Config, noInput bool) {
 		// check for ignore pattern
 		found := false
 		for _, pattern := range conf.Strategy.Ignore {
-			splittedFileName := strings.Split(fileName, "-")
-			splittedPattern := strings.Split(pattern, "-")
+			splitFileName := strings.Split(fileName, "-")
+			splitPattern := strings.Split(pattern, "-")
 
-			if splittedFileName[0] == splittedPattern[0] ||
-				splittedFileName[1] == splittedPattern[1] ||
-				splittedFileName[2] == splittedPattern[2] {
+			if splitFileName[0] == splitPattern[0] ||
+				splitFileName[1] == splitPattern[1] ||
+				splitFileName[2] == splitPattern[2] {
 				//fmt.Printf("Keep (matches ignore pattern): %s\n", fileName)
 				found = true
 				break
@@ -72,11 +72,11 @@ func delete(conf utils.Config, noInput bool) {
 			found = false
 			continue
 		}
-		deleteableBackups = append(deleteableBackups, fileName)
+		deletableBackups = append(deletableBackups, fileName)
 	}
 
-	if len(deleteableBackups) == 0 {
-		log.Debug("Nothing to delete...")
+	if len(deletableBackups) == 0 {
+		log.Debug("Nothing to deleteBackup...")
 		return
 	}
 
@@ -84,7 +84,7 @@ func delete(conf utils.Config, noInput bool) {
 		// ask user if deletion of backups is what he would like to do
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Printf("Type 'YES' to confirm the deletion of the following backups:\n%s\nYour selection: ",
-			strings.Join(deleteableBackups, ", "))
+			strings.Join(deletableBackups, ", "))
 		confirmation, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
@@ -93,8 +93,8 @@ func delete(conf utils.Config, noInput bool) {
 			return
 		}
 	}
-	// delete backups
-	for _, date := range deleteableBackups {
+	// deleteBackup backups
+	for _, date := range deletableBackups {
 		err := remove(fmt.Sprintf("%s/%s", conf.Location, date))
 		if err != nil {
 			fmt.Println(err)

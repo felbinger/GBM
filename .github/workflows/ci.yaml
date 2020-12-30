@@ -7,75 +7,134 @@ on:
   pull_request:
 
 jobs:
+
   lint:
-    name: lint
+    name: Linting (GoLang 1.15)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
         with:
-          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.29
+          go-version: 1.15
+        id: go
 
-          # Optional: working directory, useful for monorepos
-          # working-directory: somedir
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
-          # Optional: golangci-lint command line arguments.
-          # args: --issues-exit-code=0
+      - name: Cache build dependence
+        uses: actions/cache@v2
+        with:
+          # Cache
+          path: ~/go/pkg/mod
+          # Cache key
+          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
+          restore-keys: ubuntu-latest-go-
 
-          # Optional: show only new issues if it's a pull request. The default value is `false`.
-          # only-new-issues: true
+      - name: Install go ci lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
+        working-directory: src
+
+      - name: Run Linter
+        run: golangci-lint run --timeout=10m -v --disable-all --enable=govet --enable=staticcheck --enable=ineffassign --enable=misspell
+        working-directory: src
 
   test:
-    name: Test
+    name: Testing (GoLang ${{ matrix.go_version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - 1.14
+          - 1.15
 
     steps:
-      - name: Set up Go 1.x
+
+      - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.13
+          go-version: ${{ matrix.go_version }}
+        id: go
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./app
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
+      - name: Cache build dependence
+        uses: actions/cache@v2
+        with:
+          # Cache
+          path: ~/go/pkg/mod
+          # Cache key
+          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
+          restore-keys: ubuntu-latest-go-
+
+      - name: Install goimports
+        run: go get golang.org/x/tools/cmd/goimports
+        working-directory: src
 
       - name: Test
-        run: go test -v ./src2
+        run: go test -v -race ./...
+        working-directory: src
 
   build:
-    name: Build
-    needs: [ test,lint ]
+    needs: [ lint, test ]
+    name: Building (GoLang 1.15)
     runs-on: ubuntu-latest
     steps:
-
-      - name: Set up Go 1.x
+      - name: Set up Go 1.15
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.13
+          go-version: 1.15
+        id: go
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./app
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
+      - name: Cache build dependence
+        uses: actions/cache@v2
+        with:
+          # Cache
+          path: ~/go/pkg/mod
+          # Cache key
+          key: ubuntu-latest-go-${{ hashFiles('**/go.sum') }}
+          # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
+          restore-keys: ubuntu-latest-go-
+
+      - name: Install goimports
+        run: go get golang.org/x/tools/cmd/goimports
+        working-directory: src
+
       - name: Build
-        run: go build -o bin/gbm -v ./src2
+        run: go build -o ../bin/gbm -v
+        working-directory: src
 
       - uses: actions/upload-artifact@v2
         with:
           name: gbm
           path: bin/gbm
+
+  analyze:
+    needs: [ lint,test ]
+    name: "CodeQL: Analyze"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'go' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
