@@ -1,0 +1,32 @@
+location: "/var/backups/gbm"
+checksums:
+  - "md5"
+  - "sha1"
+
+jobs:
+  files:
+    - name: main
+      compress: true
+      paths:
+        - "/srv/main"
+      ignore:
+        - "/srv/main/ignore_this"
+
+    - name: admin
+      compress: true
+      paths:
+       - "/home/admin"
+
+    - name: sshd_config
+      # the compress = false option is only for standalone files
+      compress: false
+      paths:
+        - "/etc/ssh/sshd_config"
+
+strategy:
+  # how many days should backups be stored, til they get deleted?
+  expiry_days: 14
+  ignore:
+    - "YYYY-MM-10"
+    - "YYYY-MM-20"
+    - "YYYY-MM-30"
