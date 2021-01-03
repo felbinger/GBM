@@ -48,7 +48,7 @@ func deleteBackup(conf utils.Config, noInput bool) {
 
 		// skip backups of the latest n days
 		if fileName > date.Format("2006-01-02") {
-			//fmt.Printf("Keep (less than %d days old): %s\n", conf.Strategy.KeepFor, fileName)
+			log.Debug("Keep (less than %d days old): %s\n", conf.Strategy.ExpiryDays, fileName)
 			continue
 		}
 
@@ -61,7 +61,7 @@ func deleteBackup(conf utils.Config, noInput bool) {
 			if splitFileName[0] == splitPattern[0] ||
 				splitFileName[1] == splitPattern[1] ||
 				splitFileName[2] == splitPattern[2] {
-				//fmt.Printf("Keep (matches ignore pattern): %s\n", fileName)
+				log.Debug("Keep (matches ignore pattern): %s\n", fileName)
 				found = true
 				break
 			}
@@ -97,7 +97,7 @@ func deleteBackup(conf utils.Config, noInput bool) {
 	for _, date := range deletableBackups {
 		err := remove(fmt.Sprintf("%s/%s", conf.Location, date))
 		if err != nil {
-			fmt.Println(err)
+			log.Debug(err)
 		}
 	}
 	log.Info("Backups have been deleted successfully. Exiting...")

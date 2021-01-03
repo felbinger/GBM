@@ -54,7 +54,7 @@ func backup(conf utils.Config) {
 	for _, dbms := range []string{"MariaDB", "Postgres", "MongoDB"} {
 		for _, db := range conf.GetJobs(dbms) {
 			if db.Container.IsEmpty() {
-				fmt.Printf("- %s: %s can't be reached!\n", dbms, db.ContainerName)
+				log.Debug("- %s: %s can't be reached!\n", dbms, db.ContainerName)
 				continue
 			}
 
@@ -111,6 +111,11 @@ func ldapBackup(dest string, ldap utils.Ldap) error {
 		log.Info(fmt.Sprintf("%s already exists. Skipping", dest))
 		return nil
 	}
+
+	if ldap.Container.IsEmpty() {
+		log.Info(fmt.Sprintf("%s cannot be reached. Skipping", ldap.ContainerName))
+		return nil
+	}
 	regenerateChecksums = true
 
 	log.Info(fmt.Sprintf("ldap://%s:%s -> %s\n", ldap.ContainerName, ldap.BaseDn, dest))
@@ -151,6 +156,12 @@ func databaseBackup(dest string, db utils.Database, dbms string) error {
 				log.Info(fmt.Sprintf("%s already exists. Skipping", dbDest))
 				return nil
 			}
+
+			if db.Container.IsEmpty() {
+				log.Info(fmt.Sprintf("%s cannot be reached. Skipping", db.ContainerName))
+				return nil
+			}
+
 			regenerateChecksums = true
 
 			log.Info(fmt.Sprintf("%s/%s -> %s\n", db.ContainerName, database, dbDest))
