@@ -90,9 +90,22 @@ func Configure(fileName string) *Config {
 	// Databases
 	for i, db := range c.Jobs.MariaDb {
 		c.Jobs.MariaDb[i].Container = GetContainerByName(db.ContainerName)
-		fmt.Println(db.Username)
 		if db.Username != "" && db.Password != "" {
 			c.Jobs.MariaDb[i].Auth = true
+		}
+	}
+
+	for i, db := range c.Jobs.Postgres {
+		c.Jobs.Postgres[i].Container = GetContainerByName(db.ContainerName)
+		if db.Username != "" && db.Password != "" {
+			c.Jobs.Postgres[i].Auth = true
+		}
+	}
+
+	for i, db := range c.Jobs.MongoDb {
+		c.Jobs.MongoDb[i].Container = GetContainerByName(db.ContainerName)
+		if db.Username != "" && db.Password != "" {
+			c.Jobs.MongoDb[i].Auth = true
 		}
 	}
 
