@@ -147,6 +147,11 @@ func databaseBackup(dest string, db utils.Database, dbms string) error {
 		return err
 	}
 
+	if db.Container.IsEmpty() {
+		log.Info(fmt.Sprintf("%s cannot be reached. Skipping", db.ContainerName))
+		return nil
+	}
+
 	switch dbms {
 	case "MariaDB":
 		for _, database := range db.Databases {
@@ -154,11 +159,6 @@ func databaseBackup(dest string, db utils.Database, dbms string) error {
 
 			if _, err := os.Stat(dbDest); err == nil {
 				log.Info(fmt.Sprintf("%s already exists. Skipping", dbDest))
-				return nil
-			}
-
-			if db.Container.IsEmpty() {
-				log.Info(fmt.Sprintf("%s cannot be reached. Skipping", db.ContainerName))
 				return nil
 			}
 
@@ -196,51 +196,9 @@ func databaseBackup(dest string, db utils.Database, dbms string) error {
 
 		}
 	case "Postgres":
+		log.Info("Postgres Backup: Not implemented!")
 	case "MongoDB":
-		for _, database := range db.Databases {
-			dbDest := fmt.Sprintf("%s%s.tar", dest, database)
-
-			if _, err := os.Stat(dbDest); err == nil {
-				log.Info(fmt.Sprintf("%s already exists. Skipping", dbDest))
-				return nil
-			}
-			regenerateChecksums = true
-
-			log.Info(fmt.Sprintf("%s/%s -> %s\n", db.ContainerName, database, dbDest))
-
-			cmd := []string{
-				"mongodump",
-				"--host", "localhost",
-				"--port", "27017",
-				"--db=" + database,
-			}
-			if db.Auth {
-				cmd = append(cmd, []string {
-					"--username", db.Username,
-					"--password=" + db.Password,
-					"--authenticationDatabase", "admin",
-					"--authenticationMechanism", "SCRAM-SHA-1",
-				}...)
-			}
-			cmd = append(cmd, database)
-			resp, err := utils.Exec(context.Background(), db.ContainerName, cmd)
-			if err != nil {
-				return err
-			}
-
-			// write stdout to file
-			dst, err := os.Create(dbDest)
-			if err != nil {
-				return err
-			}
-			defer dst.Close()
-
-			_, err = dst.Write(resp)
-			if err != nil {
-				return err
-			}
-
-		}
+		log.Info("MongoDB Backup: Not implemented!")
 	}
 	return nil
 }
