@@ -159,7 +159,7 @@ func databaseBackup(dest string, db utils.Database, dbms string) error {
 
 			if _, err := os.Stat(dbDest); err == nil {
 				log.Info(fmt.Sprintf("%s already exists. Skipping", dbDest))
-				return nil
+				continue
 			}
 
 			regenerateChecksums = true
