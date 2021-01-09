@@ -22,6 +22,7 @@ func GenerateChecksums(path string, sums []string) {
 	for _, checksum := range sums {
 		var checksums []entry
 
+		log.Info(fmt.Sprintf("Generating %s checksum", checksum))
 		// walk through directory and add generated checksums to slice
 		_ = filepath.Walk(path, func(file string, fi os.FileInfo, err error) error {
 			if !fi.Mode().IsRegular() {
